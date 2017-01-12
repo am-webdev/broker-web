@@ -90,7 +90,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var maxBid = selectBidByMaximumPrice(auction.bids);
 			var activeElements = rowElement.querySelectorAll("output");
 			if (maxBid) {
-				activeElements[0].value = maxBid.bidder.alias;
+				activeElements[0].value = maxBid.bidder.alias; // TODO replace with img scr=avatar
 				activeElements[0].title = createDisplayTitle(maxBid.bidder);
 			}
 			activeElements[1].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
@@ -125,9 +125,9 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var maxBid = selectBidByMaximumPrice(auction.bids);
 			var userBid = selectBidByBidder(auction.bids, self.sessionContext.user.identity);
 			var activeElements = rowElement.querySelectorAll("output");
-			activeElements[0].value = auction.seller.alias;
+			activeElements[0].value = auction.seller.alias;  // TODO replace with img scr=avatar
 			activeElements[0].title = createDisplayTitle(auction.seller);
-			activeElements[1].value = maxBid.bidder.alias;
+			activeElements[1].value = maxBid.bidder.alias;	// TODO replace with img scr=avatar
 			activeElements[1].title = createDisplayTitle(maxBid.bidder);
 			activeElements[2].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			activeElements[3].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
