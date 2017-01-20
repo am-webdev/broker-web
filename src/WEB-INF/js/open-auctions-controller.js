@@ -1,6 +1,6 @@
 /**
 /**
- * de.sb.broker.ClosedAuctionsController: broker auctions controller.
+ * de.sb.broker.OpenAuctionsController: broker auctions controller.
  * Copyright (c) 2013-2015 Sascha Baumeister
  */
 "use strict";
@@ -21,17 +21,17 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 * Creates a new auctions controller that is derived from an abstract controller.
 	 * @param sessionContext {de.sb.broker.SessionContext} a session context
 	 */
-	de.sb.broker.ClosedAuctionsController = function (sessionContext) {
+	de.sb.broker.OpenAuctionsController = function (sessionContext) {
 		SUPER.call(this, 1, sessionContext);
 	}
-	de.sb.broker.ClosedAuctionsController.prototype = Object.create(SUPER.prototype);
-	de.sb.broker.ClosedAuctionsController.prototype.constructor = de.sb.broker.ClosedAuctionsController;
+	de.sb.broker.OpenAuctionsController.prototype = Object.create(SUPER.prototype);
+	de.sb.broker.OpenAuctionsController.prototype.constructor = de.sb.broker.OpenAuctionsController;
 
 
 	/**
 	 * Displays the associated view.
 	 */
-	de.sb.broker.ClosedAuctionsController.prototype.display = function () {
+	de.sb.broker.OpenAuctionsController.prototype.display = function () {
 		if (!this.sessionContext.user) return;
 		SUPER.prototype.display.call(this);
 
@@ -73,8 +73,8 @@ this.de.sb.broker = this.de.sb.broker || {};
 	/**
 	 * Displays the given auctions that feature the requester as seller.
 	 * @param auctions {Array} the seller auctions
-	 */
-	de.sb.broker.ClosedAuctionsController.prototype.displaySellerAuctions = function (auctions) {
+	 *
+	de.sb.broker.OpenAuctionsController.prototype.displaySellerAuctions = function (auctions) {
 		var tableBodyElement = document.querySelector("section.closed-seller-auctions tbody");
 		var rowTemplate = document.createElement("tr");
 		for (var index = 0; index < 7; ++index) {
@@ -103,13 +103,14 @@ this.de.sb.broker = this.de.sb.broker || {};
 			if (maxBid) activeElements[6].value = (maxBid.price * 0.01).toFixed(2);
 		});
 	}
+	*/
 
 
 	/**
 	 * Displays the given auctions that feature the requester as bidder.
 	 * @param auctions {Array} the bidder auctions
-	 */
-	de.sb.broker.ClosedAuctionsController.prototype.displayBidderAuctions = function (auctions) {
+	 *
+	de.sb.broker.OpenAuctionsController.prototype.displayBidderAuctions = function (auctions) {
 		var tableBodyElement = document.querySelector("section.closed-bidder-auctions tbody");
 		var rowTemplate = document.createElement("tr");
 		for (var index = 0; index < 9; ++index) {
@@ -140,7 +141,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			activeElements[8].value = (maxBid.price * 0.01).toFixed(2);
 		});
 	}
-
+	*/
 
 	/**
 	 * Returns the bid with the highest price offer.

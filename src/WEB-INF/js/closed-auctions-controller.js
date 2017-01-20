@@ -22,7 +22,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 */
 	de.sb.broker.ClosedAuctionsController = function (sessionContext) {
 		SUPER.call(this, 2, sessionContext);
-	}
+	};
 	de.sb.broker.ClosedAuctionsController.prototype = Object.create(SUPER.prototype);
 	de.sb.broker.ClosedAuctionsController.prototype.constructor = de.sb.broker.ClosedAuctionsController;
 
@@ -66,7 +66,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 		indebtedSemaphore.acquire(function () {
 			self.displayStatus(statusAccumulator.status, statusAccumulator.statusText);
 		});
-	}
+	};
 
 
 	/**
@@ -101,7 +101,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			activeElements[5].value = (auction.askingPrice * 0.01).toFixed(2);
 			if (maxBid) activeElements[6].value = (maxBid.price * 0.01).toFixed(2);
 		});
-	}
+	};
 
 
 	/**
@@ -138,7 +138,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			activeElements[7].value = (userBid.price * 0.01).toFixed(2);
 			activeElements[8].value = (maxBid.price * 0.01).toFixed(2);
 		});
-	}
+	};
 
 
 	/**
