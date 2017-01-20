@@ -23,7 +23,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 */
 	de.sb.broker.OpenAuctionsController = function (sessionContext) {
 		SUPER.call(this, 1, sessionContext);
-	}
+	};
 	de.sb.broker.OpenAuctionsController.prototype = Object.create(SUPER.prototype);
 	de.sb.broker.OpenAuctionsController.prototype.constructor = de.sb.broker.OpenAuctionsController;
 
@@ -67,7 +67,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 		indebtedSemaphore.acquire(function () {
 			self.displayStatus(statusAccumulator.status, statusAccumulator.statusText);
 		});
-	}
+	};
 
 
 	/**
