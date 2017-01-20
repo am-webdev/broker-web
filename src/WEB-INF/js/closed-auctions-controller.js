@@ -90,7 +90,10 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var maxBid = selectBidByMaximumPrice(auction.bids);
 			var activeElements = rowElement.querySelectorAll("output");
 			if (maxBid) {
-				activeElements[0].value = maxBid.bidder.alias; // TODO replace with img scr=avatar
+				var img = document.createElement('img');
+				var id = maxBid.bidder.identity;
+			    img.src = "/services/people/" + id + "/avatar?w=50&h=50";
+			    activeElements[0].appendChild(img);
 				activeElements[0].title = createDisplayTitle(maxBid.bidder);
 			}
 			activeElements[1].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
