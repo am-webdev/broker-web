@@ -37,7 +37,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 
 		var sectionElement = document.querySelector("#open-auctions-template").content.cloneNode(true).firstElementChild;
 		document.querySelector("main").appendChild(sectionElement);
-		sectionElement = document.querySelector("#auctions-input-template").content.cloneNode(true).firstElementChild;
+		sectionElement = document.querySelector("#auction-form-template").content.cloneNode(true).firstElementChild;
 		document.querySelector("main").appendChild(sectionElement);
 
 		var indebtedSemaphore = new de.sb.util.Semaphore(1 - 2);

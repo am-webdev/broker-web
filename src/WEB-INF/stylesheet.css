@@ -50,7 +50,7 @@ a:hover img {
 
 label.horizontal {
 	display: inline-block; width: 5em; text-align: right;
-	padding: 0 0.5em; vertical-align: middle;
+	padding: 0 0.5em; vertical-align: top;
 }
 
 
@@ -141,6 +141,14 @@ section.preferences fieldset:nth-of-type(odd) input {
 	width: 24em;
 }
 
+section.preferences fieldset div#avatar-upload {
+	display: inline-block;
+	width: 24em;
+	height: 10em;
+	border: 1px dashed #333;
+	text-align: center;
+    line-height: 10em;
+}
 
 section.closed-seller-auctions td:nth-of-type(n+5) {
 	text-align: right;
@@ -186,3 +194,4 @@ section.auction-form div:nth-of-type(5) input {
 section.auction-form div:nth-of-type(6) input {
 	width: 13.1em;
 }
+
