@@ -44,26 +44,16 @@ this.de.sb.broker = this.de.sb.broker || {};
 		var statusAccumulator = new de.sb.util.StatusAccumulator();
 		var self = this;
 
-		var resource = "/services/people/" + this.sessionContext.user.identity + "/auctions?seller=true&closed=true";
+		var resource = "/services/auctions?closed=false";
 		de.sb.util.AJAX.invoke(resource, "GET", {"Accept": "application/json"}, null, this.sessionContext, function (request) {
 			if (request.status === 200) {
 				var auctions = JSON.parse(request.responseText);
-				self.displaySellerAuctions(auctions);
+				self.displayAuctions(auctions);
 			}
 			statusAccumulator.offer(request.status, request.statusText);
 			indebtedSemaphore.release();
 		});
-
-		var resource = "/services/people/" + this.sessionContext.user.identity + "/auctions?seller=false&closed=true";
-		de.sb.util.AJAX.invoke(resource, "GET", {"Accept": "application/json"}, null, this.sessionContext, function (request) {
-			if (request.status === 200) {
-				var auctions = JSON.parse(request.responseText);
-				self.displayBidderAuctions(auctions);
-			}
-			statusAccumulator.offer(request.status, request.statusText);
-			indebtedSemaphore.release();
-		});
-
+		
 		indebtedSemaphore.acquire(function () {
 			self.displayStatus(statusAccumulator.status, statusAccumulator.statusText);
 		});
@@ -71,47 +61,11 @@ this.de.sb.broker = this.de.sb.broker || {};
 
 
 	/**
-	 * Displays the given auctions that feature the requester as seller.
-	 * @param auctions {Array} the seller auctions
-	 *
-	de.sb.broker.OpenAuctionsController.prototype.displaySellerAuctions = function (auctions) {
-		var tableBodyElement = document.querySelector("section.closed-seller-auctions tbody");
-		var rowTemplate = document.createElement("tr");
-		for (var index = 0; index < 7; ++index) {
-			var cellElement = document.createElement("td");
-			cellElement.appendChild(document.createElement("output"));
-			rowTemplate.appendChild(cellElement);
-		}
-
-		var self = this;
-		auctions.forEach(function (auction) {
-			var rowElement = rowTemplate.cloneNode(true);
-			tableBodyElement.appendChild(rowElement);
-
-			var maxBid = selectBidByMaximumPrice(auction.bids);
-			var activeElements = rowElement.querySelectorAll("output");
-			if (maxBid) {
-				activeElements[0].value = maxBid.bidder.alias;
-				activeElements[0].title = createDisplayTitle(maxBid.bidder);
-			}
-			activeElements[1].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
-			activeElements[2].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
-			activeElements[3].title = auction.description;
-			activeElements[3].value = auction.title;
-			activeElements[4].value = auction.unitCount;
-			activeElements[5].value = (auction.askingPrice * 0.01).toFixed(2);
-			if (maxBid) activeElements[6].value = (maxBid.price * 0.01).toFixed(2);
-		});
-	}
-	*/
-
-
-	/**
 	 * Displays the given auctions that feature the requester as bidder.
 	 * @param auctions {Array} the bidder auctions
-	 *
-	de.sb.broker.OpenAuctionsController.prototype.displayBidderAuctions = function (auctions) {
-		var tableBodyElement = document.querySelector("section.closed-bidder-auctions tbody");
+	 */
+	de.sb.broker.OpenAuctionsController.prototype.displayAuctions = function (auctions) {
+		var tableBodyElement = document.querySelector("section.open-auctions-template tbody");
 		var rowTemplate = document.createElement("tr");
 		for (var index = 0; index < 9; ++index) {
 			var cellElement = document.createElement("td");
@@ -140,8 +94,8 @@ this.de.sb.broker = this.de.sb.broker || {};
 			activeElements[7].value = (userBid.price * 0.01).toFixed(2);
 			activeElements[8].value = (maxBid.price * 0.01).toFixed(2);
 		});
-	}
-	*/
+	};
+	
 
 	/**
 	 * Returns the bid with the highest price offer.

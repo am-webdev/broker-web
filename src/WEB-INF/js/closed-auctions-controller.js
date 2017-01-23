@@ -90,7 +90,10 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var maxBid = selectBidByMaximumPrice(auction.bids);
 			var activeElements = rowElement.querySelectorAll("output");
 			if (maxBid) {
-				activeElements[0].value = maxBid.bidder.alias; // TODO replace with img scr=avatar
+				var img = document.createElement('img');
+				var id = maxBid.bidder.identity;
+			    img.src = "/services/people/" + id + "/avatar?w=50&h=50";
+			    activeElements[0].appendChild(img);
 				activeElements[0].title = createDisplayTitle(maxBid.bidder);
 			}
 			activeElements[1].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
@@ -125,10 +128,25 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var maxBid = selectBidByMaximumPrice(auction.bids);
 			var userBid = selectBidByBidder(auction.bids, self.sessionContext.user.identity);
 			var activeElements = rowElement.querySelectorAll("output");
-			activeElements[0].value = auction.seller.alias;  // TODO replace with img scr=avatar
-			activeElements[0].title = createDisplayTitle(auction.seller);
-			activeElements[1].value = maxBid.bidder.alias;	// TODO replace with img scr=avatar
-			activeElements[1].title = createDisplayTitle(maxBid.bidder);
+			
+			var img, id;
+			
+			if(auction){
+				img = document.createElement('img');
+				id = auction.seller.identity;
+			    img.src = "/services/people/" + id + "/avatar?w=50&h=50";
+			    activeElements[0].appendChild(img);
+				activeElements[0].title = createDisplayTitle(auction.seller);
+			}
+			
+			if(maxBid){
+				img = document.createElement('img');
+				id = maxBid.bidder.identity;
+			    img.src = "/services/people/" + id + "/avatar?w=50&h=50";
+			    activeElements[1].appendChild(img);
+				activeElements[1].title = createDisplayTitle(maxBid.bidder);
+			}
+			
 			activeElements[2].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			activeElements[3].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			activeElements[4].value = auction.title;
@@ -177,6 +195,6 @@ this.de.sb.broker = this.de.sb.broker || {};
 	function createDisplayTitle (person) {
 		if (!person) return "";
 		if (!person.name) return person.alias;
-		return person.name.given + " " + person.name.family + " (" + person.contact.email + ")";
+		return person.alias + " : " + person.name.given + " " + person.name.family + " (" + person.contact.email + ")";
 	}
 } ());
