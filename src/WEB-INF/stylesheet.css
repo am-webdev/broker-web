@@ -143,11 +143,16 @@ section.preferences fieldset:nth-of-type(odd) input {
 
 section.preferences fieldset div#avatar-upload {
 	display: inline-block;
-	width: 24em;
-	height: 10em;
+	width: 15.4em;
+    height: 7em;
 	border: 1px dashed #333;
 	text-align: center;
-    line-height: 10em;
+    line-height: 7em;
+}
+
+section.preferences fieldset div#avatar-container img {
+	display: inline-block;
+	vertical-align: top;
 }
 
 section.closed-seller-auctions td:nth-of-type(n+5) {
