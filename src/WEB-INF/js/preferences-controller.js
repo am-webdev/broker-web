@@ -16,7 +16,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 */
 	de.sb.broker.PreferencesController = function (sessionContext) {
 		SUPER.call(this, 3, sessionContext);
-	}
+	};
 	de.sb.broker.PreferencesController.prototype = Object.create(SUPER.prototype);
 	de.sb.broker.PreferencesController.prototype.constructor = de.sb.broker.PreferencesController;
 	
@@ -30,38 +30,36 @@ this.de.sb.broker = this.de.sb.broker || {};
 		
 		var sectionElement = document.querySelector("#preferences-template").content.cloneNode(true).firstElementChild;
 		sectionElement.querySelector("button").addEventListener("click", this.persistUser.bind(this));
-		
+		var self = this;
 		//Drag & Drop Events
-		sectionElement.querySelector("#avatar-upload").addEventListener("dragover", function( event ) {
+		var avatarElement = sectionElement.querySelector("#avatar-upload");
+		avatarElement.addEventListener("dragover", function( event ) {
 		    event.preventDefault();
 		    event.dataTransfer.dropEffect = 'copy';
 		}, false);
-		sectionElement.querySelector("#avatar-upload").addEventListener("drop", function( event ) {
+		avatarElement.addEventListener("drop", function( event ) {
+			var array;
 			event.preventDefault();
 			var reader = new FileReader();
-			var blob;
 			reader.onload = function() {
-				  var arrayBuffer = this.result,
-				  array = new Uint8Array(arrayBuffer),
-				  blob = new Blob(array, {type : 'application/octet-stream'});
-			}
+				var arrayBuffer = this.result,
+				array = new Uint8Array(arrayBuffer);
+				self.uploadAvatar(array);	
+			};
 			reader.readAsArrayBuffer(event.dataTransfer.files[0]);
-			de.sb.broker.PreferencesController.prototype.uploadAvatar(blob);
 		}, false);
 		
 		//Load current image or if not exist the default one
 		var img = document.createElement('img');
-	    //img.src = "/services/people/" + this.sessionContext.user.identity + "/avatar?w=100&h=100";
+	    img.src = "/services/people/" + this.sessionContext.user.identity + "/avatar?w=50&h=50";
 	    //only to test image display
-		img.src = "/services/people/1/avatar?w=100&h=100";
 	    //default avatar src need to be set then
-		img.addEventListener('error', function() {img.src="default-avatar"});
 	    sectionElement.querySelector('#avatar-container').appendChild(img);
 	    
 	    document.querySelector("main").appendChild(sectionElement);
 
 		this.displayUser();
-	}
+	};
 	
 	/**
 	 * Displays the session user.
@@ -79,21 +77,23 @@ this.de.sb.broker = this.de.sb.broker || {};
 		activeElements[7].value = user.address.city;
 		activeElements[8].value = user.contact.email;
 		activeElements[9].value = user.contact.phone;
-	}
+	};
 	
 	/**
 	 * Upload user avatar
 	 */
-	de.sb.broker.PreferencesController.prototype.uploadAvatar = function (blobObject) {
-		
+	de.sb.broker.PreferencesController.prototype.uploadAvatar = function (array) {
+
 		var user = JSON.parse(JSON.stringify(this.sessionContext.user));
-		user.avatar.type = "application/octet-stream";		
-		user.avatar.content = blobObject;		
+		console.log("user: ", user);
+		user.avatar = {type : "application/octet-stream", content : array};
+		// user.avatar.type = "application/octet-stream";		
+		// user.avatar.content = array;		
 		var self = this;
 		var resource = "/services/people/" + this.sessionContext.user.identity + "/avatar";
-		var header = {"Content-type": "application/json"};
-		var body = JSON.stringify(user);
-		de.sb.util.AJAX.invoke(resource, "PUT", header, body, this.sessionContext, function (request) {
+		var header = {"Content-type": "application/octet-stream"};
+		// var body = JSON.stringify(array);
+		de.sb.util.AJAX.invoke(resource, "PUT", header, array, this.sessionContext, function (request) {
 			self.displayStatus(request.status, request.statusText);
 			if (request.status === 200) {
 				self.sessionContext.user.avatar = user.avatar;
@@ -103,7 +103,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 				self.displayUser();
 			}
 		});
-	}
+	};
 
 
 	/**
@@ -140,5 +140,5 @@ this.de.sb.broker = this.de.sb.broker || {};
 				self.displayUser();
 			}
 		});
-	}
+	};
 } ());
