@@ -30,7 +30,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 		
 		var sectionElement = document.querySelector("#preferences-template").content.cloneNode(true).firstElementChild;
 		sectionElement.querySelector("button").addEventListener("click", this.persistUser.bind(this));
-		
+		var self = this;
 		//Drag & Drop Events
 		sectionElement.querySelector("#avatar-upload").addEventListener("dragover", function( event ) {
 		    event.preventDefault();
@@ -39,23 +39,20 @@ this.de.sb.broker = this.de.sb.broker || {};
 		sectionElement.querySelector("#avatar-upload").addEventListener("drop", function( event ) {
 			event.preventDefault();
 			var reader = new FileReader();
-			var blob;
+			var array;
 			reader.onload = function() {
 				  var arrayBuffer = this.result,
-				  array = new Uint8Array(arrayBuffer),
-				  blob = new Blob(array, {type : 'application/octet-stream'});
+				  array = new Uint8Array(arrayBuffer)
 			}
 			reader.readAsArrayBuffer(event.dataTransfer.files[0]);
-			de.sb.broker.PreferencesController.prototype.uploadAvatar(blob);
+			self.uploadAvatar(array);
 		}, false);
 		
 		//Load current image or if not exist the default one
 		var img = document.createElement('img');
 	    //img.src = "/services/people/" + this.sessionContext.user.identity + "/avatar?w=100&h=100";
-	    //only to test image display
 		img.src = "/services/people/1/avatar?w=100&h=100";
 	    //default avatar src need to be set then
-		img.addEventListener('error', function() {img.src="default-avatar"});
 	    sectionElement.querySelector('#avatar-container').appendChild(img);
 	    
 	    document.querySelector("main").appendChild(sectionElement);
@@ -84,11 +81,11 @@ this.de.sb.broker = this.de.sb.broker || {};
 	/**
 	 * Upload user avatar
 	 */
-	de.sb.broker.PreferencesController.prototype.uploadAvatar = function (blobObject) {
+	de.sb.broker.PreferencesController.prototype.uploadAvatar = function (array) {
 		
 		var user = JSON.parse(JSON.stringify(this.sessionContext.user));
 		user.avatar.type = "application/octet-stream";		
-		user.avatar.content = blobObject;		
+		user.avatar.content = array;		
 		var self = this;
 		var resource = "/services/people/" + this.sessionContext.user.identity + "/avatar";
 		var header = {"Content-type": "application/json"};
