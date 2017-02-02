@@ -36,10 +36,12 @@ this.de.sb.broker = this.de.sb.broker || {};
 		SUPER.prototype.display.call(this);
 
 		var sectionElement = document.querySelector("#open-auctions-template").content.cloneNode(true).firstElementChild;
+		sectionElement.querySelector("button").addEventListener("click", this.displayForm.bind(this));		
 		document.querySelector("main").appendChild(sectionElement);
+		
 		sectionElement = document.querySelector("#auction-form-template").content.cloneNode(true).firstElementChild;
-		document.querySelector("main").appendChild(sectionElement);
-
+		document.querySelector("main").appendChild(sectionElement);		
+		
 		var indebtedSemaphore = new de.sb.util.Semaphore(1 - 2);
 		var statusAccumulator = new de.sb.util.StatusAccumulator();
 		var self = this;
@@ -59,7 +61,6 @@ this.de.sb.broker = this.de.sb.broker || {};
 		});
 	};
 
-
 	/**
 	 * Displays the given auctions that feature the requester as bidder.
 	 * @param auctions {Array} the bidder auctions
@@ -74,6 +75,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 		}
 
 		var self = this;
+		//TODO: fix! Uncaught TypeError: Cannot read property 'forEach' of undefined
 		auctions.forEach(function (auction) {
 			var rowElement = rowTemplate.cloneNode(true);
 			tableBodyElement.appendChild(rowElement);
@@ -94,6 +96,63 @@ this.de.sb.broker = this.de.sb.broker || {};
 			activeElements[7].value = (userBid.price * 0.01).toFixed(2);
 			activeElements[8].value = (maxBid.price * 0.01).toFixed(2);
 		});
+	};
+	
+	
+	/**
+	 * Display the auction edit-form
+	 */
+	de.sb.broker.OpenAuctionsController.prototype.displayForm = function () {
+		var formElement = document.querySelector("main").lastChild;
+		formElement.className += " active";
+		
+		//TODO: Form for if an auction will be edit: 
+		//@param aution
+		//if(auction) exists and there's no bid -> set new Field values
+		//persist Auction with new Values excluding Timestamp
+		
+		
+		var creationTimeStamp = e.timeStamp;
+		var inputElements = document.querySelectorAll("section.auction-form input");
+		var startDate = new Date();
+		inputElements[0].value = formatDate(startDate.getMonth()+1) + "/" + formatDate(startDate.getDate()) + "/" + (startDate.getFullYear()) + " " + formatDate(startDate.getHours()) + ":" + formatDate(startDate.getMinutes());
+		var endDate = new Date((new Date()).getTime() + 30*24*60*60*1000);
+		inputElements[1].value = formatDate(endDate.getMonth()+1) + "/" + formatDate(endDate.getDate()) + "/" + (endDate.getFullYear()) + " " + formatDate(endDate.getHours()) + ":" + formatDate(endDate.getMinutes());
+		
+		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this));
+		formElement.querySelector("#abort").addEventListener("click", function() {
+			formElement.className = "auction-form";
+		});
+	}
+	
+	/**
+	 * Persists a new auction.
+	 */
+
+	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function () {
+		var inputElements = document.querySelectorAll("section.auction-form input");
+		var textAreaElement = document.querySelector("section.auction-form textarea");
+
+		var auction = {};
+		auction.closureTimestamp = toTimestamp(String(inputElements[1].value));
+		auction.title = inputElements[2].value.trim();
+		auction.description = textAreaElement.value.trim();
+		auction.unitCount = inputElements[3].value;
+		auction.askingPrice = inputElements[4].value.split('.').join('');
+
+		var self = this;
+		var header = {"Content-type": "application/json"};
+		var body = JSON.stringify(auction);
+		de.sb.util.AJAX.invoke("/services/auctions", "PUT", header, body, this.sessionContext, function (request) {
+			self.displayStatus(request.status, request.statusText);
+			if (request.status === 200) {
+				self.displayAuctions();
+			} else if (request.status === 409) {
+				de.sb.broker.APPLICATION.welcomeController.display(); 
+			} 
+		});
+		
+		document.querySelector("main").lastChild.className = "auction-form";
 	};
 	
 
@@ -125,7 +184,6 @@ this.de.sb.broker = this.de.sb.broker || {};
 		return null;
 	}
 
-
 	/**
 	 * Creates a display title for the given person.
 	 * @param person {Object} the person
@@ -134,5 +192,26 @@ this.de.sb.broker = this.de.sb.broker || {};
 		if (!person) return "";
 		if (!person.name) return person.alias;
 		return person.name.given + " " + person.name.family + " (" + person.contact.email + ")";
+	}
+	
+	/**
+	 * Creates the price
+	 */
+	function createPrice(price) {
+		return (Math.floor(cents/100)) + "." + (cents % 100);
+	}
+	
+	/**
+	 * Format the date for display
+	 */
+	function formatDate(value) {
+		return (value.toString().length == 1) ? "0"+ value : value;
+	}
+	
+	/**
+	 * Convert date to timestamp for insertion
+	 */
+	function toTimestamp(date) {
+		return Date.parse(date);
 	}
 } ());

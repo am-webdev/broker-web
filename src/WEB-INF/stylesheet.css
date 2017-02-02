@@ -172,6 +172,15 @@ section.open-auctions td:nth-of-type(7) input[type="number"] {
 	width: 5em;
 }
 
+
+section.auction-form {
+	display: none;
+}
+
+section.auction-form.active {
+	display: block;
+}
+
 section.auction-form textarea {
 	vertical-align: middle;
 }

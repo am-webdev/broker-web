@@ -41,7 +41,6 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var array;
 			event.preventDefault();
 			var reader = new FileReader();
-<<<<<<< HEAD
 			var array;
 			reader.onload = function() {
 				  var arrayBuffer = this.result,
@@ -49,25 +48,18 @@ this.de.sb.broker = this.de.sb.broker || {};
 			}
 			reader.readAsArrayBuffer(event.dataTransfer.files[0]);
 			self.uploadAvatar(array);
-=======
 			reader.onload = function() {
 				var arrayBuffer = this.result,
 				array = new Uint8Array(arrayBuffer);
 				self.uploadAvatar(array);	
 			};
 			reader.readAsArrayBuffer(event.dataTransfer.files[0]);
->>>>>>> f9bce59f5b7fe7928d55e3c6dffe8521b0c496a8
 		}, false);
 		
 		//Load current image or if not exist the default one
 		var img = document.createElement('img');
-<<<<<<< HEAD
-	    //img.src = "/services/people/" + this.sessionContext.user.identity + "/avatar?w=100&h=100";
-		img.src = "/services/people/1/avatar?w=100&h=100";
-=======
 	    img.src = "/services/people/" + this.sessionContext.user.identity + "/avatar?w=50&h=50";
 	    //only to test image display
->>>>>>> f9bce59f5b7fe7928d55e3c6dffe8521b0c496a8
 	    //default avatar src need to be set then
 	    sectionElement.querySelector('#avatar-container').appendChild(img);
 	    
@@ -98,23 +90,15 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 * Upload user avatar
 	 */
 	de.sb.broker.PreferencesController.prototype.uploadAvatar = function (array) {
-<<<<<<< HEAD
-		
 		var user = JSON.parse(JSON.stringify(this.sessionContext.user));
 		user.avatar.type = "application/octet-stream";		
 		user.avatar.content = array;		
-=======
-
 		var user = JSON.parse(JSON.stringify(this.sessionContext.user));
 		console.log("user: ", user);
-		user.avatar = {type : "application/octet-stream", content : array};
-		// user.avatar.type = "application/octet-stream";		
-		// user.avatar.content = array;		
->>>>>>> f9bce59f5b7fe7928d55e3c6dffe8521b0c496a8
+		user.avatar = {type : "application/octet-stream", content : array};	
 		var self = this;
 		var resource = "/services/people/" + this.sessionContext.user.identity + "/avatar";
 		var header = {"Content-type": "application/octet-stream"};
-		// var body = JSON.stringify(array);
 		de.sb.util.AJAX.invoke(resource, "PUT", header, array, this.sessionContext, function (request) {
 			self.displayStatus(request.status, request.statusText);
 			if (request.status === 200) {
