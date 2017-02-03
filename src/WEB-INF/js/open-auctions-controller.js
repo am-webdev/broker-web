@@ -99,7 +99,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			if(auction.seller.identity === self.sessionContext.user.identity) {
 				if(!auction.sealed) {	
 					var editButton = editTemplate.querySelector("#edit");
-					editButton.addEventListener("click", self.displayForm(auction).bind(self));		
+					//editButton.addEventListener("click", self.displayForm(auction).bind(self));		
 					activeElements[6].appendChild(editButton);		// EDIT YOUR OWN AUCTION 									
 				} else {					
 					activeElements[6].value = "SEALED";		//WHAT DO WE SHOW?
@@ -118,8 +118,8 @@ this.de.sb.broker = this.de.sb.broker || {};
 	/**
 	 * Display the auction edit-form
 	 */
-	de.sb.broker.OpenAuctionsController.prototype.displayForm = function (auction) {
-		auction = auction || null;
+	de.sb.broker.OpenAuctionsController.prototype.displayForm = function () {
+		var auction = null;
 		var formElement = document.querySelector("main").cloneNode(true).lastChild;
 		formElement.className += " active";
 		
