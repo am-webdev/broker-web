@@ -99,14 +99,14 @@ this.de.sb.broker = this.de.sb.broker || {};
 			if(auction.seller.identity === self.sessionContext.user.identity) {
 				if(!auction.sealed) {	
 					var editButton = editTemplate.querySelector("#edit");
-					//editButton.addEventListener("click", self.displayForm(auction).bind(self));		
+					editButton.addEventListener("click", self.displayForm.bind(self, auction));		
 					activeElements[6].appendChild(editButton);		// EDIT YOUR OWN AUCTION 									
 				} else {					
-					activeElements[6].value = "SEALED";		//WHAT DO WE SHOW?
+					activeElements[6].value = "SEALED";		
 				}
 			} else {
 					var editField = editTemplate.querySelector("#bidEdit");	
-					var editButton = editTemplate.querySelector("#edit");
+					var editButton = editTemplate.querySelector("#edit"); // TODO change button title
 					//editButton.addEventListener("click", self.displayForm.bind(this));	// INSTEAD PUT YOUR BID
 					activeElements[6].appendChild(editField);		
 					activeElements[6].appendChild(editButton);	
@@ -118,14 +118,14 @@ this.de.sb.broker = this.de.sb.broker || {};
 	/**
 	 * Display the auction edit-form
 	 */
-	de.sb.broker.OpenAuctionsController.prototype.displayForm = function () {
-		var auction = null;
+	de.sb.broker.OpenAuctionsController.prototype.displayForm = function (auction) {
 		var formElement = document.querySelector("main").lastChild;
 		formElement.className += " active";
 		
 		var inputElements = document.querySelectorAll("section.auction-form input");
-		console.log("auction: ", auction);
-		if(auction != null) {
+		var auctionIdentity = 0;
+		if(auction) {
+			auctionIdentity = auction.identity;
 			inputElements[0].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			inputElements[1].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			inputElements[2].value = auction.title;
@@ -138,7 +138,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var endDate = new Date((new Date()).getTime() + 30*24*60*60*1000);
 			inputElements[1].value = formatDate(endDate.getMonth()+1) + "/" + formatDate(endDate.getDate()) + "/" + (endDate.getFullYear()) + " " + formatDate(endDate.getHours()) + ":" + formatDate(endDate.getMinutes());			
 		}		
-		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this));
+		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this, auctionIdentity)); // TODO bind id to persist
 		formElement.querySelector("#abort").addEventListener("click", function() {
 			formElement.className = "auction-form";
 		});
@@ -148,11 +148,12 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 * Persists a new auction.
 	 */
 
-	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function () {
+	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function (auctionIdentity) {
 		var inputElements = document.querySelectorAll("section.auction-form input");
 		var textAreaElement = document.querySelector("section.auction-form textarea");
-
+		
 		var auction = {};
+		auction.identity = auctionIdentity;
 		auction.closureTimestamp = toTimestamp(String(inputElements[1].value));
 		auction.title = inputElements[2].value.trim();
 		auction.description = textAreaElement.value.trim();
