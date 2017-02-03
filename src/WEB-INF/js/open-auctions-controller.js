@@ -120,20 +120,20 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 */
 	de.sb.broker.OpenAuctionsController.prototype.displayForm = function () {
 		var auction = null;
-		var formElement = document.querySelector("main").cloneNode(true).lastChild;
+		var formElement = document.querySelector("main").lastChild;
 		formElement.className += " active";
 		
 		var inputElements = document.querySelectorAll("section.auction-form input");
-		var startDate = new Date();
-		
-		if(auction !== null) {
+		console.log("auction: ", auction);
+		if(auction != null) {
 			inputElements[0].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			inputElements[1].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			inputElements[2].value = auction.title;
 			inputElements[3].value = auction.unitCount;
 			inputElements[4].value = (auction.askingPrice * 0.01).toFixed(2);
 			document.querySelector("section.auction-form textarea").value = auction.description;
-		} else {
+		} else {			
+			var startDate = new Date();
 			inputElements[0].value = formatDate(startDate.getMonth()+1) + "/" + formatDate(startDate.getDate()) + "/" + (startDate.getFullYear()) + " " + formatDate(startDate.getHours()) + ":" + formatDate(startDate.getMinutes());
 			var endDate = new Date((new Date()).getTime() + 30*24*60*60*1000);
 			inputElements[1].value = formatDate(endDate.getMonth()+1) + "/" + formatDate(endDate.getDate()) + "/" + (endDate.getFullYear()) + " " + formatDate(endDate.getHours()) + ":" + formatDate(endDate.getMinutes());			
