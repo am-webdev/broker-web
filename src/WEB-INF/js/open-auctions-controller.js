@@ -111,8 +111,6 @@ this.de.sb.broker = this.de.sb.broker || {};
 		//if(auction) exists and there's no bid -> set new Field values
 		//persist Auction with new Values excluding Timestamp
 		
-		
-		var creationTimeStamp = e.timeStamp;
 		var inputElements = document.querySelectorAll("section.auction-form input");
 		var startDate = new Date();
 		inputElements[0].value = formatDate(startDate.getMonth()+1) + "/" + formatDate(startDate.getDate()) + "/" + (startDate.getFullYear()) + " " + formatDate(startDate.getHours()) + ":" + formatDate(startDate.getMinutes());
@@ -146,7 +144,15 @@ this.de.sb.broker = this.de.sb.broker || {};
 		de.sb.util.AJAX.invoke("/services/auctions", "PUT", header, body, this.sessionContext, function (request) {
 			self.displayStatus(request.status, request.statusText);
 			if (request.status === 200) {
-				self.displayAuctions();
+				
+				var resource = "/services/auctions?closed=false";
+				de.sb.util.AJAX.invoke(resource, "GET", {"Accept": "application/json"}, null, self.sessionContext, function (request) {
+					if (request.status === 200) {
+						var auctions = JSON.parse(request.responseText);
+						self.displayAuctions(auctions);
+					}
+				});
+				
 			} else if (request.status === 409) {
 				de.sb.broker.APPLICATION.welcomeController.display(); 
 			} 
