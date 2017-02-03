@@ -124,8 +124,10 @@ this.de.sb.broker = this.de.sb.broker || {};
 		
 		var inputElements = document.querySelectorAll("section.auction-form input");
 		var auctionIdentity = 0;
+		var auctionVersion = 0;
 		if(auction) {
 			auctionIdentity = auction.identity;
+			auctionVersion = auction.version;
 			inputElements[0].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			inputElements[1].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
 			inputElements[2].value = auction.title;
@@ -138,7 +140,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var endDate = new Date((new Date()).getTime() + 30*24*60*60*1000);
 			inputElements[1].value = formatDate(endDate.getMonth()+1) + "/" + formatDate(endDate.getDate()) + "/" + (endDate.getFullYear()) + " " + formatDate(endDate.getHours()) + ":" + formatDate(endDate.getMinutes());			
 		}		
-		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this, auctionIdentity)); // TODO bind id to persist
+		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this, auctionIdentity, auctionVersion)); // TODO bind id to persist
 		formElement.querySelector("#abort").addEventListener("click", function() {
 			formElement.className = "auction-form";
 		});
@@ -148,7 +150,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 * Persists a new auction.
 	 */
 
-	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function (auctionIdentity) {
+	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function (auctionIdentity, auctionVersion) {
 		var inputElements = document.querySelectorAll("section.auction-form input");
 		var textAreaElement = document.querySelector("section.auction-form textarea");
 		
@@ -159,7 +161,8 @@ this.de.sb.broker = this.de.sb.broker || {};
 		auction.description = textAreaElement.value.trim();
 		auction.unitCount = inputElements[3].value;
 		auction.askingPrice = inputElements[4].value.split('.').join('');
-
+		auction.version = auctionVersion;
+	
 		var self = this;
 		var header = {"Content-type": "application/json"};
 		var body = JSON.stringify(auction);

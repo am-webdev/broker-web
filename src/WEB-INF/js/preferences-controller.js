@@ -43,9 +43,9 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var reader = new FileReader();
 			var array;
 			reader.onload = function() {
-				  var arrayBuffer = this.result,
-				  array = new Uint8Array(arrayBuffer)
-			}
+				  var arrayBuffer = this.result;
+				  array = new Uint8Array(arrayBuffer);
+			};
 			reader.readAsArrayBuffer(event.dataTransfer.files[0]);
 			self.uploadAvatar(array);
 			reader.onload = function() {
@@ -91,11 +91,8 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 */
 	de.sb.broker.PreferencesController.prototype.uploadAvatar = function (array) {
 		var user = JSON.parse(JSON.stringify(this.sessionContext.user));
-		user.avatar.type = "application/octet-stream";		
-		user.avatar.content = array;		
-		var user = JSON.parse(JSON.stringify(this.sessionContext.user));
-		console.log("user: ", user);
 		user.avatar = {type : "application/octet-stream", content : array};	
+		console.log("user: ", user);
 		var self = this;
 		var resource = "/services/people/" + this.sessionContext.user.identity + "/avatar";
 		var header = {"Content-type": "application/octet-stream"};
