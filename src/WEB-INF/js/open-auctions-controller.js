@@ -66,35 +66,55 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 * @param auctions {Array} the bidder auctions
 	 */
 	de.sb.broker.OpenAuctionsController.prototype.displayAuctions = function (auctions) {
-		var tableBodyElement = document.querySelector("section.open-auctions-template tbody");
+		var tableBodyElement = document.querySelector("section.open-auctions tbody");
 		var rowTemplate = document.createElement("tr");
-		for (var index = 0; index < 9; ++index) {
+		for (var index = 0; index < 7; ++index) {
 			var cellElement = document.createElement("td");
 			cellElement.appendChild(document.createElement("output"));
 			rowTemplate.appendChild(cellElement);
 		}
 
 		var self = this;
-		//TODO: fix! Uncaught TypeError: Cannot read property 'forEach' of undefined
 		auctions.forEach(function (auction) {
 			var rowElement = rowTemplate.cloneNode(true);
 			tableBodyElement.appendChild(rowElement);
 
-			var maxBid = selectBidByMaximumPrice(auction.bids);
-			var userBid = selectBidByBidder(auction.bids, self.sessionContext.user.identity);
 			var activeElements = rowElement.querySelectorAll("output");
-			activeElements[0].value = auction.seller.alias;
-			activeElements[0].title = createDisplayTitle(auction.seller);
-			activeElements[1].value = maxBid.bidder.alias;
-			activeElements[1].title = createDisplayTitle(maxBid.bidder);
-			activeElements[2].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
-			activeElements[3].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
-			activeElements[4].value = auction.title;
-			activeElements[4].title = auction.description;
-			activeElements[5].value = auction.unitCount;
-			activeElements[6].value = (auction.askingPrice * 0.01).toFixed(2);
-			activeElements[7].value = (userBid.price * 0.01).toFixed(2);
-			activeElements[8].value = (maxBid.price * 0.01).toFixed(2);
+			var img, id;
+			if(auction){
+				img = document.createElement('img');
+				id = auction.seller.identity;
+			    img.src = "/services/people/" + id + "/avatar?w=50&h=50";
+			    activeElements[0].appendChild(img);
+				activeElements[0].title = createDisplayTitle(auction.seller);
+			}
+			activeElements[1].value = new Date(auction.creationTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
+			activeElements[2].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
+			activeElements[3].value = auction.title;
+			activeElements[3].title = auction.description;
+			activeElements[4].value = auction.unitCount;
+			activeElements[5].value = (auction.askingPrice * 0.01).toFixed(2);
+			var editTemplate = document.querySelector("#edit-auctions-bid-template").content.cloneNode(true).firstElementChild;
+			if(auction.seller.identity === self.sessionContext.user.identity) {
+				if(!auction.sealed) {	
+					var editButton = editTemplate.querySelector("#edit");
+					editButton.addEventListener("click", self.displayForm.bind(self, auction));		
+					activeElements[6].appendChild(editButton);		// EDIT YOUR OWN AUCTION 									
+				} else {					
+					activeElements[6].value = "SEALED";		
+				}
+			} else {
+					var editField = editTemplate.querySelector("#bidEdit");	
+					var sendButton = editTemplate.querySelector("#send");
+					var bidValue = 0;	
+					var auctionIdentity = auction.identity;
+					sendButton.addEventListener("click", function() {
+						bidValue = this.parentElement.firstChild.value;
+						self.persistBid(self, auctionIdentity, bidValue);
+					});
+					activeElements[6].appendChild(editField);		
+					activeElements[6].appendChild(sendButton);	
+			}
 		});
 	};
 	
@@ -102,49 +122,57 @@ this.de.sb.broker = this.de.sb.broker || {};
 	/**
 	 * Display the auction edit-form
 	 */
-	de.sb.broker.OpenAuctionsController.prototype.displayForm = function () {
+	de.sb.broker.OpenAuctionsController.prototype.displayForm = function (auction) {
 		var formElement = document.querySelector("main").lastChild;
 		formElement.className += " active";
-		
-		//TODO: Form for if an auction will be edit: 
-		//@param aution
-		//if(auction) exists and there's no bid -> set new Field values
-		//persist Auction with new Values excluding Timestamp
-		
+
 		var inputElements = document.querySelectorAll("section.auction-form input");
-		var startDate = new Date();
-		inputElements[0].value = formatDate(startDate.getMonth()+1) + "/" + formatDate(startDate.getDate()) + "/" + (startDate.getFullYear()) + " " + formatDate(startDate.getHours()) + ":" + formatDate(startDate.getMinutes());
-		var endDate = new Date((new Date()).getTime() + 30*24*60*60*1000);
-		inputElements[1].value = formatDate(endDate.getMonth()+1) + "/" + formatDate(endDate.getDate()) + "/" + (endDate.getFullYear()) + " " + formatDate(endDate.getHours()) + ":" + formatDate(endDate.getMinutes());
-		
-		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this));
+		var auctionIdentity = 0;
+		var auctionVersion = 0;
+		if(auction) {
+			auctionIdentity = auction.identity;
+			auctionVersion = auction.version;
+			inputElements[0].value = new Date(auction.closureTimestamp - 30*24*60*60*1000).toLocaleString(TIMESTAMP_OPTIONS);
+			inputElements[1].value = new Date(auction.closureTimestamp).toLocaleString(TIMESTAMP_OPTIONS);
+			inputElements[2].value = auction.title;
+			inputElements[3].value = auction.unitCount;
+			inputElements[4].value = (auction.askingPrice * 0.01).toFixed(2);
+			document.querySelector("section.auction-form textarea").value = auction.description;
+		} else {			
+			var startDate = new Date();
+			inputElements[0].value = formatDate(startDate.getMonth()+1) + "/" + formatDate(startDate.getDate()) + "/" + (startDate.getFullYear()) + " " + formatDate(startDate.getHours()) + ":" + formatDate(startDate.getMinutes());
+			var endDate = new Date((new Date()).getTime() + 30*24*60*60*1000);
+			inputElements[1].value = formatDate(endDate.getMonth()+1) + "/" + formatDate(endDate.getDate()) + "/" + (endDate.getFullYear()) + " " + formatDate(endDate.getHours()) + ":" + formatDate(endDate.getMinutes());			
+		}		
+		formElement.querySelector("#submit").addEventListener("click", this.persistAuction.bind(this, auctionIdentity, auctionVersion)); // TODO bind id to persist
 		formElement.querySelector("#abort").addEventListener("click", function() {
 			formElement.className = "auction-form";
 		});
-	}
+	};
 	
 	/**
 	 * Persists a new auction.
 	 */
-
-	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function () {
+	de.sb.broker.OpenAuctionsController.prototype.persistAuction = function (auctionIdentity, auctionVersion) {
 		var inputElements = document.querySelectorAll("section.auction-form input");
 		var textAreaElement = document.querySelector("section.auction-form textarea");
-
+		
 		var auction = {};
+		auction.identity = auctionIdentity;
 		auction.closureTimestamp = toTimestamp(String(inputElements[1].value));
 		auction.title = inputElements[2].value.trim();
 		auction.description = textAreaElement.value.trim();
 		auction.unitCount = inputElements[3].value;
 		auction.askingPrice = inputElements[4].value.split('.').join('');
-
+		auction.version = auctionVersion;
+	
 		var self = this;
 		var header = {"Content-type": "application/json"};
 		var body = JSON.stringify(auction);
 		de.sb.util.AJAX.invoke("/services/auctions", "PUT", header, body, this.sessionContext, function (request) {
 			self.displayStatus(request.status, request.statusText);
 			if (request.status === 200) {
-				
+
 				var resource = "/services/auctions?closed=false";
 				de.sb.util.AJAX.invoke(resource, "GET", {"Accept": "application/json"}, null, self.sessionContext, function (request) {
 					if (request.status === 200) {
@@ -152,7 +180,8 @@ this.de.sb.broker = this.de.sb.broker || {};
 						self.displayAuctions(auctions);
 					}
 				});
-				
+
+				self.display();
 			} else if (request.status === 409) {
 				de.sb.broker.APPLICATION.welcomeController.display(); 
 			} 
@@ -160,6 +189,28 @@ this.de.sb.broker = this.de.sb.broker || {};
 		
 		document.querySelector("main").lastChild.className = "auction-form";
 	};
+	
+	/**
+	 * Persists a new bid for auction.
+	 */
+	de.sb.broker.OpenAuctionsController.prototype.persistBid = function(object, auctionIdentity, bidValue){		
+		
+		var self = this, bid;
+		
+		de.sb.util.AJAX.invoke("/services/auctions/" + auctionIdentity + "/bid", "GET", {"Accept": "application/json"}, null, this.sessionContext, function (request) {
+			if (request.status === 200 || request.status === 204) {
+				//TODO: Fix! No Content-Error 204 even if 1 Bid was inserted before
+				//-> thats why getting a duplicate entry as system tries to insert a new one instead of uploading
+				bid = (request.status === 200) ? JSON.parse(request.responseText) : {};
+				bid.price = bidValue.split('.').join('');
+				var header = {"Content-type": "text/plain"};
+				var body = JSON.stringify(bid);
+				de.sb.util.AJAX.invoke("/services/auctions/" + auctionIdentity + "/bid", "POST", header, bid.price, self.sessionContext, function (request) {
+					self.display();
+				});
+			}
+		});
+	}
 	
 
 	/**
@@ -169,9 +220,11 @@ this.de.sb.broker = this.de.sb.broker || {};
 	 */
 	function selectBidByMaximumPrice (bids) {
 		var maxBid = null;
-		bids.forEach(function (bid) {
-			if (!maxBid || bid.price > maxBid.price) maxBid = bid;
-		});
+		if(bids !== undefined) {
+			bids.forEach(function (bid) {
+				if (!maxBid || bid.price > maxBid.price) maxBid = bid;
+			});
+		}
 		return maxBid;
 	}
 
