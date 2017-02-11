@@ -43,12 +43,6 @@ this.de.sb.broker = this.de.sb.broker || {};
 			var reader = new FileReader();
 			var array;
 			reader.onload = function() {
-				  var arrayBuffer = this.result;
-				  array = new Uint8Array(arrayBuffer);
-			};
-			reader.readAsArrayBuffer(event.dataTransfer.files[0]);
-			self.uploadAvatar(array);
-			reader.onload = function() {
 				var arrayBuffer = this.result,
 				array = new Uint8Array(arrayBuffer);
 				self.uploadAvatar(array);	
