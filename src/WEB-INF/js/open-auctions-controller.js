@@ -99,21 +99,32 @@ this.de.sb.broker = this.de.sb.broker || {};
 				if(!auction.sealed) {	
 					var editButton = editTemplate.querySelector("#edit");
 					editButton.addEventListener("click", self.displayForm.bind(self, auction));		
-					activeElements[6].appendChild(editButton);		// EDIT YOUR OWN AUCTION 									
+					activeElements[6].appendChild(editButton);											
 				} else {					
 					activeElements[6].value = "SEALED";		
 				}
 			} else {
+				var resource = "/services/auctions/" + auction.identity + "/bid";
+				de.sb.util.AJAX.invoke(resource, "GET", {"Accept": "application/json"}, null, self.sessionContext, function (request) {
 					var editField = editTemplate.querySelector("#bidEdit");	
 					var sendButton = editTemplate.querySelector("#send");
-					var bidValue = 0;	
+					var bidValue = 0;
+					var bidVersion = 0;
+					if (request.status === 200) {
+						var bid = JSON.parse(request.responseText);
+						bidValue = bid.price;
+						bidVersion = bid.version;
+					}
+					
+					editField.value = (bidValue * 0.01).toFixed(2);;
 					var auctionIdentity = auction.identity;
 					sendButton.addEventListener("click", function() {
 						bidValue = this.parentElement.firstChild.value;
-						self.persistBid(self, auctionIdentity, bidValue);
+						self.persistBid(self, auctionIdentity, bidValue, bidVersion);
 					});
 					activeElements[6].appendChild(editField);		
 					activeElements[6].appendChild(sendButton);	
+				});
 			}
 		});
 	};
@@ -193,7 +204,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 	/**
 	 * Persists a new bid for auction.
 	 */
-	de.sb.broker.OpenAuctionsController.prototype.persistBid = function(object, auctionIdentity, bidValue){		
+	de.sb.broker.OpenAuctionsController.prototype.persistBid = function(object, auctionIdentity, bidValue, bidVersion){		
 		
 		var self = this, bid;
 		
@@ -202,6 +213,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 				//TODO: Fix! No Content-Error 204 even if 1 Bid was inserted before
 				//-> thats why getting a duplicate entry as system tries to insert a new one instead of uploading
 				bid = (request.status === 200) ? JSON.parse(request.responseText) : {};
+				bid.version = bidVersion;
 				bid.price = bidValue.split('.').join('');
 				var header = {"Content-type": "text/plain"};
 				var body = JSON.stringify(bid);
@@ -210,7 +222,7 @@ this.de.sb.broker = this.de.sb.broker || {};
 				});
 			}
 		});
-	}
+	};
 	
 
 	/**
